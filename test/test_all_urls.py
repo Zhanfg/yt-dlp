@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import collections
 
 from test.helper import gettestcases
-from yt_dlp.extractor import FacebookIE, YoutubeIE, gen_extractors
+from yt_dlp.extractor import BiliBiliPlayerIE, FacebookIE, YoutubeIE, gen_extractors
 
 
 class TestAllURLsMatching(unittest.TestCase):
@@ -65,6 +65,32 @@ class TestAllURLsMatching(unittest.TestCase):
     def test_youtube_search_matching(self):
         self.assertMatch('http://www.youtube.com/results?search_query=making+mustard', ['youtube:search_url'])
         self.assertMatch('https://www.youtube.com/results?baz=bar&search_query=youtube-dl+test+video&filters=video&lclk=video', ['youtube:search_url'])
+
+    def test_bilibili_player_matching(self):
+        self.assertMatch('https://www.bilibili.com/video/av117404441053918', ['BiliBili'])
+        self.assertMatch('https://www.bilibili.com/video/BV1myHQ6SEqR', ['BiliBili'])
+        self.assertMatch('https://player.bilibili.com/player.html?bvid=BV1myHQ6SEqR', ['BiliBiliPlayer'])
+        self.assertMatch('https://player.bilibili.com/player.html?cid=123&bvid=BV1myHQ6SEqR', ['BiliBiliPlayer'])
+        self.assertMatch('https://player.bilibili.com/player.html?aid=92494333&cid=157926707', ['BiliBiliPlayer'])
+
+    def test_bilibili_player_embed(self):
+        player_url = 'https://player.bilibili.com/player.html?bvid=BV1myHQ6SEqR'
+        html = f'<meta property="og:video" content="{player_url}">'
+        self.assertEqual(
+            list(BiliBiliPlayerIE._extract_embed_urls('https://www.bilibili.com/', html)),
+            [player_url])
+
+    def test_bilibili_player_redirect(self):
+        player_ie = BiliBiliPlayerIE()
+        self.assertEqual(
+            player_ie._real_extract('https://player.bilibili.com/player.html?bvid=BV1myHQ6SEqR')['url'],
+            'https://www.bilibili.com/video/BV1myHQ6SEqR')
+        self.assertEqual(
+            player_ie._real_extract('https://player.bilibili.com/player.html?aid=92494333')['url'],
+            'https://www.bilibili.com/video/av92494333')
+        self.assertEqual(
+            player_ie._real_extract('https://player.bilibili.com/player.html?cid=123&bvid=BV1myHQ6SEqR')['url'],
+            'https://www.bilibili.com/video/BV1myHQ6SEqR')
 
     def test_facebook_matching(self):
         self.assertTrue(FacebookIE.suitable('https://www.facebook.com/Shiniknoh#!/photo.php?v=10153317450565268'))
