@@ -2059,16 +2059,26 @@ class BilibiliAudioAlbumIE(BilibiliAudioBaseIE):
 
 
 class BiliBiliPlayerIE(InfoExtractor):
-    _VALID_URL = r'https?://player\.bilibili\.com/player\.html\?.*?\baid=(?P<id>\d+)'
-    _TEST = {
+    _VALID_URL = (
+        r'https?://player\.bilibili\.com/player\.html\?'
+        r'(?:[^#]*?&)?(?:bvid=(?P<bvid>BV[a-zA-Z0-9]+)|aid=(?P<aid>\d+))'
+    )
+    _EMBED_REGEX = [
+        r'(?P<url>https?://player\.bilibili\.com/player\.html\?[^"\'\s<>]+)',
+    ]
+    _TESTS = [{
+        'url': 'https://player.bilibili.com/player.html?bvid=BV1myHQ6SEqR',
+        'only_matching': True,
+    }, {
         'url': 'http://player.bilibili.com/player.html?aid=92494333&cid=157926707&page=1',
         'only_matching': True,
-    }
+    }]
 
     def _real_extract(self, url):
-        video_id = self._match_id(url)
+        match = self._match_valid_url(url)
+        video_id = match.group('bvid') or f'av{match.group("aid")}'
         return self.url_result(
-            f'http://www.bilibili.tv/video/av{video_id}/',
+            f'https://www.bilibili.com/video/{video_id}',
             ie=BiliBiliIE.ie_key(), video_id=video_id)
 
 
