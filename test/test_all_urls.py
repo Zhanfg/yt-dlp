@@ -79,6 +79,15 @@ class TestAllURLsMatching(unittest.TestCase):
             list(BiliBiliPlayerIE._extract_embed_urls('https://www.bilibili.com/', html)),
             [player_url])
 
+    def test_bilibili_player_redirect(self):
+        player_ie = BiliBiliPlayerIE()
+        self.assertEqual(
+            player_ie._real_extract('https://player.bilibili.com/player.html?bvid=BV1myHQ6SEqR')['url'],
+            'https://www.bilibili.com/video/BV1myHQ6SEqR')
+        self.assertEqual(
+            player_ie._real_extract('https://player.bilibili.com/player.html?aid=92494333')['url'],
+            'https://www.bilibili.com/video/av92494333')
+
     def test_facebook_matching(self):
         self.assertTrue(FacebookIE.suitable('https://www.facebook.com/Shiniknoh#!/photo.php?v=10153317450565268'))
         self.assertTrue(FacebookIE.suitable('https://www.facebook.com/cindyweather?fref=ts#!/photo.php?v=10152183998945793'))
