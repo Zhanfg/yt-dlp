@@ -70,6 +70,7 @@ class TestAllURLsMatching(unittest.TestCase):
         self.assertMatch('https://www.bilibili.com/video/av117404441053918', ['BiliBili'])
         self.assertMatch('https://www.bilibili.com/video/BV1myHQ6SEqR', ['BiliBili'])
         self.assertMatch('https://player.bilibili.com/player.html?bvid=BV1myHQ6SEqR', ['BiliBiliPlayer'])
+        self.assertMatch('https://player.bilibili.com/player.html?cid=123&bvid=BV1myHQ6SEqR', ['BiliBiliPlayer'])
         self.assertMatch('https://player.bilibili.com/player.html?aid=92494333&cid=157926707', ['BiliBiliPlayer'])
 
     def test_bilibili_player_embed(self):
@@ -87,6 +88,9 @@ class TestAllURLsMatching(unittest.TestCase):
         self.assertEqual(
             player_ie._real_extract('https://player.bilibili.com/player.html?aid=92494333')['url'],
             'https://www.bilibili.com/video/av92494333')
+        self.assertEqual(
+            player_ie._real_extract('https://player.bilibili.com/player.html?cid=123&bvid=BV1myHQ6SEqR')['url'],
+            'https://www.bilibili.com/video/BV1myHQ6SEqR')
 
     def test_facebook_matching(self):
         self.assertTrue(FacebookIE.suitable('https://www.facebook.com/Shiniknoh#!/photo.php?v=10153317450565268'))
